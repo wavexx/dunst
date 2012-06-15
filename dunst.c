@@ -37,16 +37,17 @@ typedef struct _screen_info {
 } screen_info;
 
 
-/* global variables */
 /* index of colors fit to urgency level */
 static unsigned long colors[3][ColLast];
 static Atom utf8;
 static DC *dc;
 static Window win;
 static msg_queue_t *msgqueue = NULL;
+static msg_queue_t *history = NULL;
 static time_t now;
 static int visible = False;
 static KeySym key = NoSymbol;
+static KeySym history_key = NoSymbol;
 static screen_info scr;
 static dimension_t geometry;
 static XScreenSaverInfo *screensaver_info;
@@ -55,6 +56,7 @@ static int font_h;
 /* list functions */
 msg_queue_t *add(msg_queue_t *queue, msg_queue_t *msg);
 msg_queue_t *delete(msg_queue_t *elem);
+msg_queue_t *pop(msg_queue_t *list, msg_queue_t **target);
 int list_len(msg_queue_t *list);
 
 
@@ -66,9 +68,9 @@ void delete_msg(msg_queue_t *elem);
 void drawmsg(void);
 void dunst_printf(int level, const char *fmt, ...);
 char *fix_markup(char *str);
-void free_msgqueue_t(msg_queue_t *elem);
 void handle_mouse_click(XEvent ev);
 void handleXEvents(void);
+void history_pop(void);
 void initmsg(msg_queue_t *msg);
 int is_idle(void);
 char *string_replace(const char *needle, const char *replacement, char *haystack);
@@ -144,7 +146,7 @@ delete(msg_queue_t *elem) {
 
     if(elem == msgqueue) {
         next = elem->next;
-        free_msgqueue_t(elem);
+        history = add(history, elem);
         return next;
     }
 
@@ -160,7 +162,7 @@ delete(msg_queue_t *elem) {
     }
 
     prev->next = next;
-    free_msgqueue_t(elem);
+    history = add(history, elem);
     return msgqueue;
 }
 
@@ -174,6 +176,34 @@ int list_len(msg_queue_t *list) {
         count++;
     }
     return count;
+}
+
+msg_queue_t*
+pop(msg_queue_t *list, msg_queue_t **target) {
+    msg_queue_t *prev = NULL;
+    msg_queue_t *cur = NULL;
+
+    if (!list) {
+        *target = NULL;
+        return list;
+    }
+
+    if (!list->next) {
+        *target = list;
+        return NULL;
+    }
+
+    cur = list->next;
+    prev = list;
+    while(cur->next) {
+        cur = cur->next;
+        prev = prev->next;
+    }
+
+    prev->next = NULL;
+
+    *target = cur;
+    return list;
 }
 
 void
@@ -391,22 +421,6 @@ char
 }
 
 void
-free_msgqueue_t(msg_queue_t *elem) {
-    int i;
-    free(elem->appname);
-    free(elem->summary);
-    free(elem->body);
-    free(elem->icon);
-    free(elem->msg);
-    for(i = 0; i < ColLast; i++) {
-        if(elem->color_strings[i] != NULL) {
-            free(elem->color_strings[i]);
-        }
-    }
-    free(elem);
-}
-
-void
 handle_mouse_click(XEvent ev) {
     msg_queue_t *cur_msg = msgqueue;
     int i;
@@ -447,6 +461,9 @@ handleXEvents(void) {
             if(XLookupKeysym(&ev.xkey, 0) == key) {
                 delete_msg(NULL);
             }
+            if(XLookupKeysym(&ev.xkey, 0) == history_key) {
+                history_pop();
+            }
         }
     }
 }
@@ -462,6 +479,20 @@ _set_color(msg_queue_t *msg, int color_idx) {
     } else {
         msg->colors[color_idx] = color.pixel;
     }
+}
+
+void
+history_pop(void) {
+    msg_queue_t *elem = NULL;
+    history = pop(history, &elem);
+    if(!elem) {
+        return;
+    }
+    msgqueue = add(msgqueue, elem);
+    elem->timeout = elem->timeout == -1 ? timeouts[elem->urgency] : elem->timeout;
+
+    elem->start = 0;
+    drawmsg();
 }
 
 void
@@ -602,6 +633,11 @@ setup(void) {
         code = XKeysymToKeycode(dc->dpy, key);
         XGrabKey(dc->dpy, code, mask, root, True, GrabModeAsync, GrabModeAsync);
     }
+
+    if (history_key != NoSymbol) {
+        code = XKeysymToKeycode(dc->dpy, history_key);
+        XGrabKey(dc->dpy, code, mask, root, True, GrabModeAsync, GrabModeAsync);
+    }
 }
 
 void
@@ -630,6 +666,7 @@ main(int argc, char *argv[]) {
             &geometry.x, &geometry.y,
             &geometry.w, &geometry.h);
     key = key_string ? XStringToKeysym(key_string) : NoSymbol;
+    history_key = history_key_string ? XStringToKeysym(history_key_string) : NoSymbol;
     screensaver_info = XScreenSaverAllocInfo();
 
     while(1) {
@@ -649,6 +686,7 @@ main(int argc, char *argv[]) {
         {"mon", required_argument, NULL, 'm'},
         {"format", required_argument, NULL, 'f'},
         {"key", required_argument, NULL, 'k'},
+        {"history_key", required_argument, NULL, 'K'},
         {"geometry", required_argument, NULL, 'g'},
         {"mod", required_argument, NULL, 'M'},
         {"ns", no_argument, NULL, 'x'},
@@ -714,6 +752,9 @@ main(int argc, char *argv[]) {
             case 'k':
                 key = XStringToKeysym(optarg);
                 break;
+            case 'K':
+                history_key = XStringToKeysym(optarg);
+                break;
             case 'g':
                 geometry.mask = XParseGeometry(optarg,
                         &geometry.x, &geometry.y,
@@ -766,6 +807,6 @@ main(int argc, char *argv[]) {
 
 void
 usage(int exit_status) {
-    fputs("usage: dunst [-h/--help] [-v] [-geometry geom] [-fn font] [-format fmt]\n[-nb color] [-nf color] [-lb color] [-lf color] [-cb color] [ -cf color]\n[-to secs] [-lto secs] [-cto secs] [-nto secs] [-key key] [-mod modifier] [-mon n]\n", stderr);
+    fputs("usage: dunst [-h/--help] [-v] [-geometry geom] [-fn font] [-format fmt]\n[-nb color] [-nf color] [-lb color] [-lf color] [-cb color] [ -cf color]\n[-to secs] [-lto secs] [-cto secs] [-nto secs] [-key key] [-history_key key] [-mod modifier] [-mon n] [-config dunstrc]\n", stderr);
     exit(exit_status);
 }

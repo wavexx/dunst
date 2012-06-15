@@ -29,6 +29,11 @@ const int idle_threshold = 120;
 
 char *key_string = NULL; /* set to NULL for no keybinging */
 /* char *key_string = "space"; */
+
+/* key to redisplay last message(s) */
+char *history_key_string = NULL;
+/* char *history_key_string = "grave"; */
+
 KeySym mask = 0;
 /* KeySym mask = ControlMask; */
 /* KeySym mask = ControlMask || Mod4Mask */
