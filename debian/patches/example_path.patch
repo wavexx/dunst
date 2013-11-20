@@ -1,0 +1,36 @@
+Description: Place example in /usr/share/doc/dunst/
+Author: Michael Stapelberg <stapelberg@debian.org>
+
+---
+
+Forwarded: not-needed
+Last-Update: 2012-09-27
+
+Index: dunst/README.pod
+===================================================================
+--- dunst.orig/README.pod	2012-08-08 21:38:29.000000000 +0200
++++ dunst/README.pod	2012-08-08 21:47:49.510208145 +0200
+@@ -136,7 +136,7 @@
+ 
+ =head1 CONFIGURATION
+ 
+-An example configuration file is included (usually /usr/share/dunst/dunstrc).
++An example configuration file is included (usually /usr/share/doc/dunst/dunstrc.example.gz).
+ To change the configuration, copy this file to ~/.config/dunst/dunstrc and edit
+ it accordingly.
+ 
+Index: dunst/Makefile
+===================================================================
+--- dunst.orig/Makefile	2012-08-08 21:38:29.000000000 +0200
++++ dunst/Makefile	2012-08-08 21:48:14.586461332 +0200
+@@ -47,8 +47,8 @@
+ 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
+ 	@cp -f dunst.1 ${DESTDIR}${MANPREFIX}/man1/
+ 	@chmod 644 ${DESTDIR}${MANPREFIX}/man1/dunst.1
+-	@mkdir -p "${DESTDIR}${PREFIX}/share/dunst"
+-	@ cp -f dunstrc ${DESTDIR}${PREFIX}/share/dunst
++	@mkdir -p "${DESTDIR}${PREFIX}/share/doc/dunst"
++	@ cp -f dunstrc ${DESTDIR}${PREFIX}/share/doc/dunst/dunstrc.example
+ 	@mkdir -p "${DESTDIR}${PREFIX}/share/dbus-1/services/"
+ 	@cp -vf org.knopwob.dunst.service "${DESTDIR}${PREFIX}/share/dbus-1/services/org.knopwob.dunst.service"
+ 

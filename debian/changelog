@@ -1,0 +1,58 @@
+dunst (1.0.0-2) unstable; urgency=low
+
+  * experimental to unstable because dunst 1.0.0 was only in experimental due
+    to the freeze. I even got a user request to provide 1.0.0 in !experimental
+    because it supports RTL text.
+  * Canonicalize Vcs-* fields
+
+ -- Michael Stapelberg <stapelberg@debian.org>  Sun, 16 Jun 2013 23:30:14 +0200
+
+dunst (1.0.0-1) experimental; urgency=low
+
+  * New upstream version
+    (Configured fonts might break due to the switch to pango)
+  * Bump standards-version to 3.9.4 (no changes necessary)
+
+ -- Michael Stapelberg <stapelberg@debian.org>  Mon, 15 Apr 2013 15:18:58 +0200
+
+dunst (0.5.0-1) experimental; urgency=low
+
+  * New upstream version
+
+ -- Michael Stapelberg <stapelberg@debian.org>  Wed, 30 Jan 2013 21:30:19 +0100
+
+dunst (0.4.0-1) experimental; urgency=low
+
+  * New upstream version
+
+ -- Michael Stapelberg <stapelberg@debian.org>  Thu, 27 Sep 2012 12:55:06 +0200
+
+dunst (0.3.1-1) experimental; urgency=low
+
+  * Imported Upstream version 0.3.1
+  * move packaging to collab-maint
+  * update patches/example_path.patch for 0.3.1
+  * enable hardening
+  * Make Makefile use overwritten variables like CFLAGS (for hardening)
+
+ -- Michael Stapelberg <stapelberg@debian.org>  Wed, 08 Aug 2012 22:26:27 +0200
+
+dunst (0.2.0-3) unstable; urgency=low
+
+  * Ship org.knopwob.dunst.service so that dunst gets D-Bus-activated when a
+    notification arrives. Thanks Jakob Haufe. (Closes: #683089)
+
+ -- Michael Stapelberg <stapelberg@debian.org>  Thu, 02 Aug 2012 00:07:31 +0200
+
+dunst (0.2.0-2) unstable; urgency=low
+
+  * Add Provides: notification-daemon so that you can use dunst to replace
+    another notification-daemon. Thanks Andrew Hout. (Closes: #681732)
+
+ -- Michael Stapelberg <stapelberg@debian.org>  Mon, 16 Jul 2012 20:31:29 +0200
+
+dunst (0.2.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #678445)
+
+ -- Michael Stapelberg <stapelberg@debian.org>  Wed, 27 Jun 2012 18:02:29 +0200

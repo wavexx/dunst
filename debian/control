@@ -1,0 +1,34 @@
+Source: dunst-git
+Section: x11
+Priority: extra
+Maintainer: Sascha Kruse <knopwob@gmail.com>
+Build-Depends: debhelper (>= 8.0.0),
+               libdbus-1-dev,
+	       libx11-dev,
+	       libxinerama-dev,
+	       libxft-dev,
+	       libxss-dev,
+	       libxdg-basedir-dev,
+	       libglib2.0-dev,
+	       libpango1.0-dev,
+	       libcairo2-dev,
+	       libfreetype6-dev,
+	       libnotify-dev,
+	       dpkg-dev (>= 1.16.1.1)
+Standards-Version: 3.9.4
+Homepage: http://www.knopwob.org/dunst/
+Vcs-Git: http://github.com/knopwob/dunst
+Vcs-Browser: http://github.com/knopwob/dunst
+
+Package: dunst-git
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: notification-daemon
+Description: dmenu-ish notification-daemon
+ Dunst is a highly configurable and lightweight notification-daemon: The
+ only thing it displays is a colored box with unformatted text. The whole
+ notification specification (non-optional parts and the "body" capability) is
+ supported as long as it fits into this look & feel.
+ .
+ Dunst is designed to fit nicely into minimalistic windowmanagers like dwm, but
+ it should work on any Linux desktop.
