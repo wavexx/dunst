@@ -278,13 +278,11 @@ static void onNotify(GDBusConnection * connection,
         n->color_strings[ColBG] = bgcolor;
 
         int id = notification_init(n, replaces_id);
-        wake_up();
-
         GVariant *reply = g_variant_new("(u)", id);
         g_dbus_method_invocation_return_value(invocation, reply);
         g_dbus_connection_flush(connection, NULL, NULL, NULL);
 
-        run(NULL);
+        wake_up();
 }
 
 static void onCloseNotification(GDBusConnection * connection,
